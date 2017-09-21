@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: nexus
+objects:
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: ${APPLICATION_NAME}
+  spec:
+    selector:
+      name: ${APPLICATION_NAME}
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          name: ${APPLICATION_NAME}
+      spec:
+        serviceAccountName: ${APPLICATION_NAME}
+        containers:
+        - image: ${NEXUS_IMAGE}
+          imagePullPolicy: Always
+          name: ${APPLICATION_NAME}
+          volumeMounts:
+          - mountPath: /nexus-data
+            name: nexus-data
+        volumes:
+        - name: nexus-data
+          persistentVolumeClaim:
+            claimName: nexus-data
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${APPLICATION_NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${APPLICATION_NAME}:latest
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: nexus
+  spec:
+    dockerImageRepository: sonatype/nexus3
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    creationTimestamp: null
+    labels:
+      template: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: ${APPLICATION_NAME}
+  spec:
+    ports:
+    - name: 8081-tcp
+      port: 8081
+      protocol: TCP
+      targetPort: 8081
+    selector:
+      deploymentconfig: ${APPLICATION_NAME}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      volume.beta.kubernetes.io/storage-class: glusterfs-storage
+    name: nexus-data
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${VOLUME_CAPACITY}
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: nexus
+  spec:
+    to:
+      kind: Service
+      name: ${APPLICATION_NAME}
+parameters:
+- name: APPLICATION_NAME
+  required: true
+  value: nexus
+- description: Volume space available for data, e.g. 512Mi, 2Gi
+  name: VOLUME_CAPACITY
+  required: true
+  value: 1Gi

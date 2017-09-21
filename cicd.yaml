@@ -1,0 +1,145 @@
+---
+- name: Setup and installing sso demo.
+  hosts: localhost
+  vars_files:
+    - vars.yaml
+  tasks:
+
+    - include: setup.yaml
+
+    - name: Login in OpenShift
+      shell: "oc login --insecure-skip-tls-verify=true -u {{ username }} -p {{ password }} {{ openshift_console }}"
+      tags:
+        - openshift
+
+    - name: Define project = {{ project_name }}
+      shell: "oc project {{ project_name }}"
+      tags:
+        - openshift
+
+- name: Installing Gogs App.
+  hosts: localhost
+  vars_files:
+    - vars.yaml
+  tasks:
+
+    - name: Creating Gogs App
+      shell: "oc new-app -f {{ gogs_template }}"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - gogs
+
+    - name: Getting gogs hostname.
+      shell: "oc get routes | grep gogs | awk '{print $2}'"
+      register: command_result
+      tags:
+        - openshift
+        - gogs
+
+    - name: Getting Gogs Router Hostname {{ ':' }} {{ command_result.stdout_lines[0] }}
+      set_fact: gogs_hostname=http://{{ command_result.stdout_lines[0] }}
+      tags:
+        - openshift
+        - gogs
+
+    - name: Getting password from Postgresql deployment config.
+      shell: "oc env dc/postgresql --list | grep -v \\{{ '#' }} | grep POSTGRESQL_PASSWORD | awk -F '=' '{print $2}'"
+      register: command_result
+
+    - name: Getting password from Postgresql deployment config {{ ':' }} {{ command_result.stdout_lines[0] }}
+      set_fact: pgsql_password={{ command_result.stdout_lines[0] }}
+      tags:
+        - openshift
+        - gogs
+
+    - debug:
+        var: pgsql_password
+
+    - name: Waiting to start gogs.
+      shell: "curl --silent {{ gogs_hostname }}"
+      register: result
+      until: result.stdout.find("Found") != -1
+      retries: 20
+      delay: 15
+
+    - name: Configuring gogs server.
+      shell: "curl -o /dev/null -vL --post302 -w \"%{http_code}\" {{ gogs_hostname }}/install \
+            --form db_type=PostgreSQL \
+            --form db_host=postgresql:5432 \
+            --form db_user=gogs \
+            --form db_passwd={{ pgsql_password }} \
+            --form db_name=gogs \
+            --form ssl_mode=disable \
+            --form \"app_name=Gogs: Go Git Service\" \
+            --form repo_root_path=/var/tmp \
+            --form run_user=gogs \
+            --form domain=localhost \
+            --form ssh_port=22 \
+            --form http_port=3000 \
+            --form app_url={{ gogs_hostname }} \
+            --form log_root_path=/opt/gogs/log \
+            --form admin_name={{ gogs_admin_user }} \
+            --form admin_passwd={{ gogs_admin_password }} \
+            --form admin_confirm_passwd=gogs \
+            --form admin_email=admin@gogs.com"
+      register: result
+
+- name: Installing Nexus App
+  hosts: localhost
+  vars_files:
+    - vars.yaml
+  tasks:
+    - name: Creating Nexus App
+      shell: "oc new-app -f {{ nexus_template }}"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - nexus
+
+- name: Adding Nexus Repositories
+  hosts: localhost
+  vars_files:
+    - vars.yaml
+  tasks:
+    - name: Getting json files to add.
+      find:
+        paths: resources/repos/
+        patterns: '*.json'
+      register: repos_to_add
+
+    - name: Getting nexus hostname.
+      shell: "oc get routes | grep nexus | awk '{print $2}'"
+      register: command_result
+      tags:
+        - openshift
+
+    - name: Getting Nexus Router Hostname {{ ':' }} {{ command_result.stdout_lines[0] }}
+      set_fact: nexus_hostname=http://{{ command_result.stdout_lines[0] }}
+      tags:
+        - create_nodes
+
+    - name: Waiting to start nexus.
+      shell: "curl --silent -u admin:admin123 {{ nexus_hostname }}/service/metrics/healthcheck"
+      register: result
+      until: result.stdout.find("true") != -1
+      retries: 20
+      delay: 15
+
+    - name: Adding nexus components.
+      shell: "curl -v -u admin:admin123 --header \"Content-Type: application/json\" \"{{ nexus_hostname }}/service/siesta/rest/v1/script/\" -d @\"{{ item.path }}\""
+      register: command_result
+      with_items: "{{ repos_to_add.files }}"
+      tags:
+        - openshift
+
+    - name: Adding nexus components.
+      shell: "curl -v -X POST -u admin:admin123 --header \"Content-Type: text/plain\" \"{{ nexus_hostname }}/service/siesta/rest/v1/script/{{ item.name }}/run\""
+      register: command_result
+      with_items: "{{ nexus_repositories }}"
+      tags:
+        - openshift

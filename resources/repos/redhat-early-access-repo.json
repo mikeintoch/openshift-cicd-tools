@@ -1,0 +1,5 @@
+{
+  "name": "redhat-early-access-repo",
+  "type": "groovy",
+  "content": "repository.createMavenProxy('redhat-early-access','https://maven.repository.redhat.com/earlyaccess/all')"
+}

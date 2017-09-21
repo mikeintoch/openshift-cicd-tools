@@ -1,0 +1,34 @@
+---
+#UNCOMMENT Define the Openshift host:port address
+openshift_console: 192.168.42.19:8443
+
+#UNCOMMENT Customize rhe domain of the project
+domain: 192.168.42.19.nip.io
+
+#Your Openshift credentials
+username: developer
+password: developer
+
+#Administrative Credentials
+admin_username: system:admin
+admin_password: "''"
+
+#Define the name of the Openshift project
+project_name: cicd
+
+#Define gogs and nexus Templates
+gogs_template: https://raw.githubusercontent.com/eformat/gogs-openshift-docker/master/gogs-persistent.yaml
+nexus_template: https://raw.githubusercontent.com/eformat/openshift-nexus/master/nexus.yaml
+
+#Define admin user and admin password for gogs
+gogs_admin_user: gogs
+gogs_admin_password: gogs
+
+# Repo definition. Add or delete nexis repositories to install (You need to add json definition file in resources/repos directory)
+nexus_repositories:
+  - name: jboss-public-repo
+  - name: redhat-techpreview-all-repo
+  - name: redhat-ga-repo
+  - name: redhat-early-access-repo
+  - name: jboss-fuse-public-repo
+  - name: redhat-group-repo

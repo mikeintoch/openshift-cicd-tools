@@ -1,0 +1,48 @@
+---
+- name: Verify if variables are set
+  fail:
+    msg: "[Openshit host] and/or [Openshift subdomain] and/or are not defined. Please edit vars.yml"
+  when: (openshift_console is undefined) or (domain is undefined)
+
+- name: Login in OpenShift as administrator
+  shell: "oc login --insecure-skip-tls-verify=true -u {{ admin_username }} -p {{ admin_password }} {{ openshift_console }}"
+  tags:
+    - openshift
+    - admin
+
+- name: Create a new OpenShift project
+  shell: "oc new-project {{ project_name }} --display-name=\"CI/CD Tools\" --description=\"Continous Integration Tools\""
+  register: command_result
+  failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+  changed_when: "'exists' not in command_result.stderr"
+  tags:
+    - openshift
+    - admin
+
+- name: Adding to {{ username }} user admin role  for the {{ project_name }} project
+  shell: "oc adm policy add-role-to-user admin {{ username }} -n {{ project_name }}"
+  register: command_result
+  failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+  changed_when: "'exists' not in command_result.stderr"
+  tags:
+    - openshift
+    - admin
+
+
+- name: Adding policies to project cicd
+  shell: "oc adm policy add-scc-to-user hostaccess -z default -n cicd"
+  register: command_result
+  failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+  changed_when: "'exists' not in command_result.stderr"
+  tags:
+    - openshift
+    - admin
+
+- name: Adding policies to project cicd
+  shell: "oc adm policy add-scc-to-user hostaccess -z gogs -n cicd"
+  register: command_result
+  failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+  changed_when: "'exists' not in command_result.stderr"
+  tags:
+    - openshift
+    - admin

@@ -1,0 +1,5 @@
+{
+  "name": "jboss-fuse-public-repo",
+  "type": "groovy",
+  "content": "repository.createMavenProxy('jboss-fuse-public','https://repo.fusesource.com/nexus/content/groups/public/')"
+}
