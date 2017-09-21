@@ -1,0 +1,28 @@
+## Install CICD Tools using Ansible
+
+link:https://www.ansible.com/[Ansible] can be used to automate the installation process to setup cicd tools in Openshift.
+
+Make sure you have the following requirements installed:
+
+- Git
+- Ansible 1.9+
+
+And run the following commands:
+
+----
+$ git clone https://github.com/mikeintoch/openshift-cicd-tools.git
+$ cd openshift-cicd-tools/
+----
+
+First, *edit the vars.yaml file* to define the *'openshift_console'*, *'domain'* variables and set the admin console and provide subdomain for your openshift installation.
+
+Then execute:
+
+----
+$ ansible-playbook cicd.yaml
+----
+
+The playbook install the next tools:
+
+- Nexus 3
+- Gogs
