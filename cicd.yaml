@@ -83,7 +83,7 @@
             --form log_root_path=/opt/gogs/log \
             --form admin_name={{ gogs_admin_user }} \
             --form admin_passwd={{ gogs_admin_password }} \
-            --form admin_confirm_passwd=gogs \
+            --form admin_confirm_passwd={{ gogs_admin_password }} \
             --form admin_email=admin@gogs.com"
       register: result
 

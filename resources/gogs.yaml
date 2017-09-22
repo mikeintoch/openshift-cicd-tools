@@ -177,8 +177,11 @@ objects:
           persistentVolumeClaim:
             claimName: gogs-data
         - name: gogs-conf
-          persistentVolumeClaim:
-            claimName: gogs-conf
+          configMap:
+            name: gogs
+            items:
+              - key: app.ini
+                path: app.ini
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         securityContext: {}
@@ -234,18 +237,6 @@ objects:
       requests:
         storage: ${VOLUME_CAPACITY}
 - apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    name: gogs-conf
-    annotations:
-      volume.beta.kubernetes.io/storage-class: glusterfs-storage
-  spec:
-    accessModes:
-      - ReadWriteOnce
-    resources:
-      requests:
-        storage: ${VOLUME_CAPACITY}
-- apiVersion: v1
   kind: ServiceAccount
   metadata:
     creationTimestamp: null
@@ -264,6 +255,22 @@ objects:
     resources:
       requests:
         storage: ${DB_VOLUME_CAPACITY}
+
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: gogs
+  data:
+    app.ini: |
+      RUN_MODE = prod
+      RUN_USER = gogs
+
+      [security]
+      INSTALL_LOCK = false
+
+      [webhook]
+      SKIP_TLS_VERIFY = true
+
 parameters:
 - description: The name for the application.
   name: APPLICATION_NAME
