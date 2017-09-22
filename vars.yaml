@@ -24,7 +24,7 @@ nexus_template: https://raw.githubusercontent.com/eformat/openshift-nexus/master
 gogs_admin_user: gogs
 gogs_admin_password: gogs
 
-# Repo definition. Add or delete nexis repositories to install (You need to add json definition file in resources/repos directory)
+# Repo definition. Add or delete nexus repositories to install (You need to add json definition file in resources/repos directory)
 nexus_repositories:
   - name: jboss-public-repo
   - name: redhat-techpreview-all-repo
