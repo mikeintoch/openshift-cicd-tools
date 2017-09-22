@@ -168,9 +168,9 @@ objects:
           resources: {}
           terminationMessagePath: /dev/termination-log
           volumeMounts:
-          - mountPath: /home/gogs
+          - mountPath: /home/gogs/repositories
             name: gogs-data
-          - mountPath: /etc/gogs/conf
+          - mountPath: /opt/gogs/custom/conf
             name: gogs-conf
         volumes:
         - name: gogs-data
