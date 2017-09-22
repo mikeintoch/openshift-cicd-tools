@@ -65,11 +65,11 @@
       retries: 20
       delay: 15
 
-     - name: Waiting for PostgreSQL Pod
-        pause:
-            minutes: 3
-        tags:
-           - install_openshift
+    - name: Waiting for PostgreSQL Pod
+      pause:
+        minutes: 3
+      tags:
+        - install_openshift
 
     - name: Configuring gogs server.
       shell: "curl -o /dev/null -vL --post302 -w \"%{http_code}\" {{ gogs_hostname }}/install \
