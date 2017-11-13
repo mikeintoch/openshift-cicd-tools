@@ -149,3 +149,38 @@
       with_items: "{{ nexus_repositories }}"
       tags:
         - openshift
+
+- name: Installing Jenkins App
+  hosts: localhost
+  vars_files:
+    - vars.yaml
+  tasks:
+    - name: Login with admin user.
+      shell: "oc login --insecure-skip-tls-verify=true -u {{ admin_username }} -p {{ admin_password }} {{ openshift_console }}"
+      register: command_result
+      tags:
+        - openshift
+
+    - name: Changing to openshift project.
+      shell: "oc project openshift"
+      register: command_result
+      tags:
+        - openshift
+
+    - name: Create BuildConfig custom jenkins image.
+      shell: "oc create -f https://raw.githubusercontent.com/mikeintoch/jenkins/master/custom-jenkins.build.yaml"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - jenkins
+        - openshift
+
+    - name: Start Building custom jenkins image.
+      shell: "oc start-build custom-jenkins-build --follow"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - jenkins
+        - openshift

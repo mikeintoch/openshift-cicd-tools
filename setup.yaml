@@ -25,6 +25,15 @@
     - openshift
     - admin
 
+- name: Adding Jenkins policies to project {{ project_name }}
+  shell: "oc adm policy add-cluster-role-to-user cluster-admin system:serviceaccount:{{ project_name }}:jenkins -n {{ project_name }}"
+  register: command_result
+  failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+  changed_when: "'exists' not in command_result.stderr"
+  tags:
+    - openshift
+    - admin
+
 - name: Adding policies to project {{ project_name }}
   shell: "oc adm policy add-scc-to-user hostaccess -z default -n {{ project_name }}"
   register: command_result
