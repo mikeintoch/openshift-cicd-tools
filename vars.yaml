@@ -19,6 +19,7 @@ project_name: cicd
 #Define gogs and nexus Templates
 gogs_template: https://raw.githubusercontent.com/eformat/gogs-openshift-docker/master/gogs-persistent.yaml
 nexus_template: https://raw.githubusercontent.com/eformat/openshift-nexus/master/nexus.yaml
+sonar_template:
 
 #Define admin user and admin password for gogs
 gogs_admin_user: gogs
