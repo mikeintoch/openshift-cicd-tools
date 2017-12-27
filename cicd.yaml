@@ -150,6 +150,20 @@
       tags:
         - openshift
 
+- name: Installing Sonarqube
+  hosts: localhost
+  vars_files:
+    - vars.yaml
+  tasks:
+    - name: Creating Sonarqube App
+      shell: "oc new-app -f {{ sonar_template }}"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - sonar
+
 - name: Installing Jenkins App
   hosts: localhost
   vars_files:
