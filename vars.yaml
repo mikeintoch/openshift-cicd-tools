@@ -17,9 +17,9 @@ admin_password: "''"
 project_name: cicd
 
 #Define gogs and nexus Templates
-gogs_template: https://raw.githubusercontent.com/eformat/gogs-openshift-docker/master/gogs-persistent.yaml
-nexus_template: https://raw.githubusercontent.com/eformat/openshift-nexus/master/nexus.yaml
-sonar_template:
+gogs_template: https://raw.githubusercontent.com/mikeintoch/openshift-cicd-tools/master/gogs-persistent.yaml
+nexus_template: https://raw.githubusercontent.com/mikeintoch/openshift-cicd-tools/master/nexus.yaml
+sonar_template: https://raw.githubusercontent.com/mikeintoch/openshift-cicd-tools/master/sonarqube-template.yaml
 
 #Define admin user and admin password for gogs
 gogs_admin_user: gogs
