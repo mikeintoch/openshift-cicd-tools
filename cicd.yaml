@@ -103,7 +103,7 @@
         - gogs
 
     - name: Adding configmap to deployment config.
-      shell: "oc volume dc/gogs --add --overwrite --name=config-volume -m /etc/gogs/conf/ --source='{"configMap":{"name":"gogs","items":[{"key":"appini","path":"app.ini"}]}}'"
+      shell: "oc volume dc/gogs --add --overwrite --name=config-volume -m /etc/gogs/conf/ --source='{\"configMap\":{\"name\":\"gogs\",\"items\":[{\"key\":\"appini\",\"path\":\"app.ini\"}]}}'"
       register: command_result
       failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
       changed_when: "'exists' not in command_result.stderr"
