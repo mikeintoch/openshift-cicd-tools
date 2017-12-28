@@ -93,6 +93,14 @@
             --form admin_email=admin@gogs.com"
       register: result
 
+    - name: Waiting for Gogs Configuration
+      pause:
+        minutes: 1
+      tags:
+        - install_openshift
+
+
+
     - name: Creating Gogs Configmap
       shell: "oc create configmap gogs --from-file=appini=<(oc exec $(oc get pods | grep gogs | awk '{print $1}') -- cat /etc/gogs/conf/app.ini)"
       register: command_result
