@@ -93,16 +93,8 @@
             --form admin_email=admin@gogs.com"
       register: result
 
-    - name: Waiting for Gogs Configuration
-      pause:
-        minutes: 1
-      tags:
-        - install_openshift
-
-
-
     - name: Creating Gogs Configmap
-      shell: "oc create configmap gogs --from-file=appini=<(oc exec $(oc get pods | grep gogs | awk '{print $1}') -- cat /etc/gogs/conf/app.ini)"
+      shell: "oc create configmap gogs --from-file=appini'=<'(oc exec $(oc get pods | grep gogs | awk '{print $1}') -- cat /etc/gogs/conf/app.ini)"
       register: command_result
       failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
       changed_when: "'exists' not in command_result.stderr"
