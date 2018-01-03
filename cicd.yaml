@@ -93,11 +93,33 @@
             --form admin_email=admin@gogs.com"
       register: result
 
-    - name: Creating Gogs Configmap
-      shell: "oc create configmap gogs --from-file=appini'=<'(oc exec $(oc get pods | grep gogs | awk '{print $1}') -- cat /etc/gogs/conf/app.ini)"
+    - name: Delete previous app.ini file
+      file:
+        path: ./tmp/app.ini
+        state: absent
+      tags:
+        - openshift
+        - gogs
+
+    - name: Get app.ini configuration for configmap
+      shell: "oc exec $(oc get pods | grep gogs | awk '{print $1}') -- cat /etc/gogs/conf/app.ini > ./tmp/app.ini"
       register: command_result
-      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
-      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - gogs
+
+    - name: Replacing SKIP_TLS_VERIFY in app.ini file
+      lineinfile:
+        path: ./tmp/app.ini
+        regexp: '^SKIP_TLS_VERIFY'
+        line: 'SKIP_TLS_VERIFY = true'
+      tags:
+        - openshift
+        - gogs
+
+    - name: Creating Gogs Configmap
+      shell: 'oc create configmap gogs --from-file=appini=./tmp/app.ini'
+      register: command_result
       tags:
         - openshift
         - gogs
