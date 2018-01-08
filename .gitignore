@@ -5,4 +5,5 @@ certs/*.csr
 certs/*.jks
 certs/*.jceks
 certs/*.srl
+tmp/*.ini
 *.retry
