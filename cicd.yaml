@@ -177,14 +177,14 @@
       delay: 15
 
     - name: Adding nexus components.
-      shell: "curl -v -u admin:admin123 --header \"Content-Type: application/json\" \"{{ nexus_hostname }}/service/siesta/rest/v1/script/\" -d @\"{{ item.path }}\""
+      shell: "curl -v -u admin:admin123 --header \"Content-Type: application/json\" \"{{ nexus_hostname }}/service/rest/v1/script/\" -d @\"{{ item.path }}\""
       register: command_result
       with_items: "{{ repos_to_add.files }}"
       tags:
         - openshift
 
     - name: Adding nexus components.
-      shell: "curl -v -X POST -u admin:admin123 --header \"Content-Type: text/plain\" \"{{ nexus_hostname }}/service/siesta/rest/v1/script/{{ item.name }}/run\""
+      shell: "curl -v -X POST -u admin:admin123 --header \"Content-Type: text/plain\" \"{{ nexus_hostname }}/service/rest/v1/script/{{ item.name }}/run\""
       register: command_result
       with_items: "{{ nexus_repositories }}"
       tags:
