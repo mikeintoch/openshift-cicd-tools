@@ -46,7 +46,7 @@
         - gogs
 
     - name: Getting password from Postgresql deployment config.
-      shell: "oc env dc/postgresql --list | grep -v \\{{ '#' }} | grep POSTGRESQL_PASSWORD | awk -F '=' '{print $2}'"
+      shell: "oc set env dc/postgresql --list | grep -v \\{{ '#' }} | grep POSTGRESQL_PASSWORD | awk -F '=' '{print $2}'"
       register: command_result
 
     - name: Getting password from Postgresql deployment config {{ ':' }} {{ command_result.stdout_lines[0] }}
@@ -125,7 +125,7 @@
         - gogs
 
     - name: Adding configmap to deployment config.
-      shell: "oc volume dc/gogs --add --overwrite --name=config-volume -m /etc/gogs/conf/ --source='{\"configMap\":{\"name\":\"gogs\",\"items\":[{\"key\":\"appini\",\"path\":\"app.ini\"}]}}'"
+      shell: "oc set volume dc/gogs --add --overwrite --name=config-volume -m /etc/gogs/conf/ --source='{\"configMap\":{\"name\":\"gogs\",\"items\":[{\"key\":\"appini\",\"path\":\"app.ini\"}]}}'"
       register: command_result
       failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
       changed_when: "'exists' not in command_result.stderr"
