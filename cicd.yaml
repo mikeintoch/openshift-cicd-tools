@@ -169,26 +169,32 @@
       tags:
         - create_nodes
 
-    - name: Waiting to start nexus.
-      shell: "curl --silent -u admin:admin123 {{ nexus_hostname }}/service/metrics/healthcheck"
-      register: result
-      until: result.stdout.find("true") != -1
-      retries: 20
-      delay: 15
-
-    - name: Adding nexus components.
-      shell: "curl -v -u admin:admin123 --header \"Content-Type: application/json\" \"{{ nexus_hostname }}/service/rest/v1/script/\" -d @\"{{ item.path }}\""
-      register: command_result
-      with_items: "{{ repos_to_add.files }}"
+ #    - name: Waiting to start nexus.
+ #     shell: "curl --silent -u admin:admin123 {{ nexus_hostname }}/service/metrics/healthcheck"
+ #     register: result
+ #     until: result.stdout.find("true") != -1
+ #     retries: 20
+ #     delay: 15
+    - name: Waiting to start nexus
+      pause:
+        minutes: 3
       tags:
-        - openshift
+        - install_openshift
 
-    - name: Adding nexus components.
-      shell: "curl -v -X POST -u admin:admin123 --header \"Content-Type: text/plain\" \"{{ nexus_hostname }}/service/rest/v1/script/{{ item.name }}/run\""
-      register: command_result
-      with_items: "{{ nexus_repositories }}"
-      tags:
-        - openshift
+
+#    - name: Adding nexus components.
+#      shell: "curl -v -u admin:admin123 --header \"Content-Type: application/json\" \"{{ nexus_hostname }}/service/rest/v1/script/\" -d @\"{{ item.path }}\""
+#      register: command_result
+#      with_items: "{{ repos_to_add.files }}"
+#      tags:
+#        - openshift
+
+#    - name: Adding nexus components.
+#      shell: "curl -v -X POST -u admin:admin123 --header \"Content-Type: text/plain\" \"{{ nexus_hostname }}/service/rest/v1/script/{{ item.name }}/run\""
+#      register: command_result
+#      with_items: "{{ nexus_repositories }}"
+#      tags:
+#        - openshift
 
 - name: Installing Sonarqube
   hosts: localhost
